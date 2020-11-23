@@ -441,4 +441,9 @@ test_expect_success 'register preserves existing strategy' '
 	test_config maintenance.strategy incremental
 '
 
+test_expect_success 'run and start command fails when no git repository' '
+	test_must_fail git -C /tmp/ maintenance run &&
+	test_must_fail git -C /tmp/ maintenance start
+'
+
 test_done

@@ -1265,9 +1265,14 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts)
 {
 	int i, found_selected = 0;
 	int result = 0;
+	char *lock_path;
 	struct lock_file lk;
 	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->odb->path);
+
+	if (!r || !r->gitdir)
+		return error(_("not a git repository"));
+
+	lock_path = xstrfmt("%s/maintenance", the_repository->objects->odb->path);
 
 	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
 		/*
@@ -1513,8 +1518,13 @@ static int update_background_schedule(int run_maintenance)
 	FILE *cron_list, *cron_in;
 	const char *crontab_name;
 	struct strbuf line = STRBUF_INIT;
+	char *lock_path;
 	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->odb->path);
+
+	if (!the_repository || !the_repository->gitdir)
+		return error(_("not a git repository"));
+
+	lock_path = xstrfmt("%s/schedule", the_repository->objects->odb->path);
 
 	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0)
 		return error(_("another process is scheduling background maintenance"));
